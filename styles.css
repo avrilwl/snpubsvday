@@ -1,5 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro')
 * {
     margin: 0;
     padding: 0;
@@ -19,7 +18,7 @@
 }
 
 body {
-    font-family: 'Bitcount Single', 'Rubik', monospace;
+    font-family: 'Crimson Pro', serif;
     background: linear-gradient(135deg, #ffb3d9 0%, #ff9ec9 100%);
     min-height: 100vh;
     padding: 20px;
