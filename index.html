@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valentine's Day Dedications</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>💌 Valentine's Day Dedications</h1>
+            <p class="subtitle">Share a heartfelt message or song dedication</p>
+        </header>
+
+        <main>
+            <section class="form-section">
+                <form id="dedicationForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="senderName">Sender Name *</label>
+                            <input 
+                                type="text" 
+                                id="senderName" 
+                                name="senderName" 
+                                required
+                                placeholder="Your name"
+                            >
+                            <span class="error" id="senderNameError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="senderClass">Sender Class *</label>
+                            <input 
+                                type="text" 
+                                id="senderClass" 
+                                name="senderClass" 
+                                required
+                                placeholder="e.g., Grade 10A"
+                            >
+                            <span class="error" id="senderClassError"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="recipientName">Recipient Name *</label>
+                            <input 
+                                type="text" 
+                                id="recipientName" 
+                                name="recipientName" 
+                                required
+                                placeholder="Recipient's name"
+                            >
+                            <span class="error" id="recipientNameError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="recipientClass">Recipient Class *</label>
+                            <input 
+                                type="text" 
+                                id="recipientClass" 
+                                name="recipientClass" 
+                                required
+                                placeholder="e.g., Grade 10B"
+                            >
+                            <span class="error" id="recipientClassError"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="message">Your Message or Song Dedication *</label>
+                        <p class="hint">Maximum 30 words</p>
+                        <textarea 
+                            id="message" 
+                            name="message" 
+                            required
+                            placeholder="Write your heartfelt message or song dedication here..."
+                        ></textarea>
+                        <div class="word-count">
+                            <span id="wordCount">0</span> / 30 words
+                        </div>
+                        <span class="error" id="messageError"></span>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Submit Dedication</button>
+                </form>
+            </section>
+
+            <section class="dedications-section">
+                <h2>💕 Dedications</h2>
+                <div id="dedicationsList" class="dedications-list">
+                    <p class="no-dedications">No dedications yet. Be the first to share!</p>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Valentine's Day Dedications. Share your love! 💌</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

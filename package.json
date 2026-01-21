@@ -1,0 +1,22 @@
+{
+  "name": "valentine-dedications",
+  "version": "1.0.0",
+  "description": "Valentine's Day Message and Song Dedications - Share heartfelt dedications with a 30-word limit",
+  "main": "index.js",
+  "scripts": {
+    "dev": "python3 -m http.server 3000",
+    "build": "tsc",
+    "preview": "python3 -m http.server 3000"
+  },
+  "keywords": [
+    "valentine",
+    "dedications",
+    "typescript",
+    "web"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}
