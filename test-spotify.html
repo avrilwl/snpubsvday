@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Spotify oEmbed Test</title>
+</head>
+<body>
+    <h1>Spotify oEmbed Test</h1>
+    <p>Open browser console (F12) and check the results</p>
+    
+    <script>
+        // Test URL - a popular song
+        const testUrl = 'https://open.spotify.com/track/11dFghVXANMlKmJXsNCQvf';
+        
+        console.log('Testing Spotify oEmbed API with URL:', testUrl);
+        
+        fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(testUrl)}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Full oEmbed Response:', data);
+                console.log('Title field:', data.title);
+                console.log('Author name field:', data.author_name);
+                console.log('Provider name field:', data.provider_name);
+                console.log('HTML field:', data.html);
+            })
+            .catch(error => console.error('Error:', error));
+    </script>
+</body>
+</html>
