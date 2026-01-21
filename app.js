@@ -142,6 +142,9 @@ function handleFormSubmit(e) {
         recipientName: recipientName.value.trim(),
         recipientClass: recipientClass.value.trim(),
         message: message.value.trim(),
+        spotifyUrl: spotifyUrl.value.trim() || undefined,
+        songTitle: songTitle.textContent || undefined,
+        songArtist: songArtist.textContent || undefined,
         timestamp: new Date()
     };
 
@@ -175,6 +178,11 @@ function renderDedications() {
 // Create a dedication card HTML
 function createDedicationCard(dedication, index) {
     const formattedTime = formatDate(dedication.timestamp);
+    const spotifySection = dedication.spotifyUrl ? `
+        <div class="dedication-song">
+            🎵 <strong>Song Dedication:</strong> <a href="${escapeHtml(dedication.spotifyUrl)}" target="_blank" rel="noopener noreferrer">Listen on Spotify</a>
+        </div>
+    ` : '';
     
     return `
         <div class="dedication-card">
@@ -184,6 +192,7 @@ function createDedicationCard(dedication, index) {
                 <span>💝 To: <strong>${escapeHtml(dedication.recipientName)}</strong> (${escapeHtml(dedication.recipientClass)})</span>
             </div>
             <p class="dedication-message">"${escapeHtml(dedication.message)}"</p>
+            ${spotifySection}
             <small style="color: #95a5a6; margin-top: 10px; display: block;">${formattedTime}</small>
         </div>
     `;
