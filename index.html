@@ -92,10 +92,24 @@
                             name="spotifyUrl" 
                             placeholder="https://open.spotify.com/track/..."
                         >
-                        <div id="songPreview" class="song-preview" style="display: none;">
-                            <div class="song-info">
-                                <div class="song-title" id="songTitle"></div>
-                                <div class="song-artist" id="songArtist"></div>
+                        <div class="form-row" id="songInputFields" style="display: none;">
+                            <div class="form-group">
+                                <label for="songTitle">Song Title</label>
+                                <input 
+                                    type="text" 
+                                    id="songTitle" 
+                                    name="songTitle" 
+                                    placeholder="Song title"
+                                >
+                            </div>
+                            <div class="form-group">
+                                <label for="songArtist">Artist</label>
+                                <input 
+                                    type="text" 
+                                    id="songArtist" 
+                                    name="songArtist" 
+                                    placeholder="Artist name"
+                                >
                             </div>
                         </div>
                         <span class="error" id="spotifyUrlError"></span>

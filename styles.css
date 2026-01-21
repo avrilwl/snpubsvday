@@ -225,6 +225,7 @@ main {
     border-radius: 8px;
     border-left: 4px solid var(--dark-pink);
     animation: slideIn 0.3s ease;
+    color: white;
 }
 
 @keyframes slideIn {
@@ -239,7 +240,7 @@ main {
 }
 
 .dedication-card h3 {
-    color: var(--primary-color);
+    color: var(--dark-pink);
     font-size: 1.1rem;
     margin-bottom: 8px;
 }
