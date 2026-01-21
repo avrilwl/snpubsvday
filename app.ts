@@ -193,7 +193,7 @@ function createDedicationCard(dedication: Dedication, index: number): string {
     const formattedTime = formatDate(dedication.timestamp);
     const spotifySection = dedication.spotifyUrl ? `
         <div class="dedication-song">
-            🎵 <strong>Song Dedication:</strong> <a href="${escapeHtml(dedication.spotifyUrl)}" target="_blank" rel="noopener noreferrer">Listen on Spotify</a>
+            🎵 <a href="${escapeHtml(dedication.spotifyUrl)}" target="_blank" rel="noopener noreferrer"><strong>${escapeHtml(dedication.songTitle || 'Unknown Title')}</strong> - ${escapeHtml(dedication.songArtist || 'Unknown Artist')}</a>
         </div>
     ` : '';
     
