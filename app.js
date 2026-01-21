@@ -11,9 +11,7 @@ const message = document.getElementById('message');
 const wordCount = document.getElementById('wordCount');
 const dedicationsList = document.getElementById('dedicationsList');
 const spotifyUrl = document.getElementById('spotifyUrl');
-const songPreview = document.getElementById('songPreview');
-const songTitle = document.getElementById('songTitle');
-const songArtist = document.getElementById('songArtist');
+const songInputFields = document.getElementById('songInputFields');
 
 const MAX_WORDS = 30;
 
@@ -42,7 +40,7 @@ function updateSongPreview() {
     const url = spotifyUrl.value.trim();
     
     if (!url) {
-        songPreview.style.display = 'none';
+        songInputFields.style.display = 'none';
         return;
     }
 
@@ -51,15 +49,33 @@ function updateSongPreview() {
     
     if (trackMatch && trackMatch[1]) {
         const trackId = trackMatch[1];
-        // Fetch Spotify metadata using public APIs would require authentication
-        // For now, we'll extract and display the URL or show a generic preview
         
-        // Parse URL to show basic info
-        songTitle.textContent = 'Spotify Song Selected';
-        songArtist.textContent = 'Click the link above to preview';
-        songPreview.style.display = 'block';
+        // Use Spotify oEmbed API to get track metadata
+        fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`)
+            .then(response => response.json())
+            .then(data => {
+                // Extract title and artist from the title format "Song Title by Artist Name"
+                const titleParts = data.title.split(' by ');
+                const songTitleText = titleParts[0] || 'Unknown Title';
+                const songArtistText = titleParts[1] || 'Unknown Artist';
+                
+                // Update input fields
+                const songTitleInput = document.getElementById('songTitle');
+                const songArtistInput = document.getElementById('songArtist');
+                
+                songTitleInput.value = songTitleText;
+                songArtistInput.value = songArtistText;
+                
+                // Show the input fields
+                songInputFields.style.display = 'grid';
+            })
+            .catch(error => {
+                console.error('Error fetching Spotify metadata:', error);
+                // Show input fields anyway so user can enter manually
+                songInputFields.style.display = 'grid';
+            });
     } else {
-        songPreview.style.display = 'none';
+        songInputFields.style.display = 'none';
     }
 }
 
@@ -143,8 +159,8 @@ function handleFormSubmit(e) {
         recipientClass: recipientClass.value.trim(),
         message: message.value.trim(),
         spotifyUrl: spotifyUrl.value.trim() || undefined,
-        songTitle: songTitle.textContent || undefined,
-        songArtist: songArtist.textContent || undefined,
+        songTitle: document.getElementById('songTitle')?.value || undefined,
+        songArtist: document.getElementById('songArtist')?.value || undefined,
         timestamp: new Date()
     };
 
