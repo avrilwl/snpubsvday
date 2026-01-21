@@ -79,7 +79,14 @@ function updateSongPreview(): void {
                         songTitleText = titleParts[0].trim();
                         songArtistText = titleParts[1].trim();
                     } else {
-                        songTitleText = data.title.trim();
+                        // Try splitting by dash if "by" doesn't work
+                        const dashParts = data.title.split(/\s*[-–]\s*/);
+                        if (dashParts.length > 1) {
+                            songTitleText = dashParts[0].trim();
+                            songArtistText = dashParts[1].trim();
+                        } else {
+                            songTitleText = data.title.trim();
+                        }
                     }
                 }
                 
@@ -93,19 +100,24 @@ function updateSongPreview(): void {
                     const tempDiv = document.createElement('div');
                     tempDiv.innerHTML = data.html;
                     const text = tempDiv.textContent || tempDiv.innerText || '';
-                    // Look for pattern like "Song - Artist" in the HTML
-                    const match = text.match(/(.+?)\s*[-–]\s*(.+)/);
+                    console.log('HTML text content:', text);
+                    
+                    // Look for pattern like "Song Title – Artist Name" in the HTML
+                    let match = text.match(/^(.+?)\s*[-–]\s*(.+)/);
                     if (match && match[2]) {
                         const extracted = match[2].trim();
                         if (extracted && extracted !== 'Spotify' && extracted.length > 0) {
                             songArtistText = extracted;
                         }
                     }
-                }
-                
-                // If still unknown, check provider_name
-                if (songArtistText === 'Unknown Artist' && data.provider_name) {
-                    songArtistText = data.provider_name;
+                    
+                    // If still not found, try looking for just the artist portion
+                    if (songArtistText === 'Unknown Artist') {
+                        match = text.match(/by\s+(.+?)(?:\s+on Spotify)?$/i);
+                        if (match && match[1]) {
+                            songArtistText = match[1].trim();
+                        }
+                    }
                 }
                 
                 // Update input fields
@@ -118,10 +130,9 @@ function updateSongPreview(): void {
                 // Show the input fields
                 songInputFields.style.display = 'grid';
                 
-                console.log('Spotify metadata extracted:', { 
+                console.log('Final extracted metadata:', { 
                     title: songTitleText, 
-                    artist: songArtistText, 
-                    oEmbedResponse: data 
+                    artist: songArtistText
                 });
             })
             .catch(error => {
