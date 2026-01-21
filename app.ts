@@ -72,37 +72,41 @@ function updateSongPreview(): void {
                 
                 console.log('Raw Spotify oEmbed response:', JSON.stringify(data, null, 2));
                 
+                // Check what fields are actually in the response
+                console.log('Available fields:', Object.keys(data));
+                
                 // Primary method: Extract from title field
                 if (data.title && typeof data.title === 'string') {
                     const title = data.title.trim();
-                    console.log('Title field:', title);
+                    console.log('Title field value:', title);
                     
                     // Try splitting by " by "
                     if (title.includes(' by ')) {
                         const parts = title.split(' by ');
                         songTitleText = parts[0].trim();
                         songArtistText = parts.slice(1).join(' by ').trim();
-                        console.log('Extracted using " by ": title="' + songTitleText + '", artist="' + songArtistText + '"');
+                        console.log('✓ Successfully extracted using " by ": title="' + songTitleText + '", artist="' + songArtistText + '"');
                     } else {
-                        // If no " by ", the whole thing might be in title
                         songTitleText = title;
-                        console.log('No " by " found, using full title:', songTitleText);
+                        console.log('✗ No " by " separator found in title');
                     }
+                } else {
+                    console.log('✗ No title field found');
                 }
                 
-                // Fallback: Check if artist_name exists (some versions of the API)
-                if ((songArtistText === 'Unknown Artist' || songArtistText === '') && data.artist_name) {
+                // Fallback 1: artist_name field
+                if (songArtistText === 'Unknown Artist' && data.artist_name) {
                     songArtistText = data.artist_name.trim();
-                    console.log('Using artist_name field:', songArtistText);
+                    console.log('✓ Found artist in artist_name field');
                 }
                 
-                // Last resort: Try to extract from author_name if it's not just "Spotify"
-                if ((songArtistText === 'Unknown Artist' || songArtistText === '') && data.author_name && data.author_name !== 'Spotify') {
+                // Fallback 2: author_name field
+                if (songArtistText === 'Unknown Artist' && data.author_name && data.author_name !== 'Spotify') {
                     songArtistText = data.author_name.trim();
-                    console.log('Using author_name field:', songArtistText);
+                    console.log('✓ Found artist in author_name field');
                 }
                 
-                // Update input fields with trimmed values
+                // Update input fields
                 const songTitleInput = document.getElementById('songTitle') as HTMLInputElement;
                 const songArtistInput = document.getElementById('songArtist') as HTMLInputElement;
                 
@@ -111,12 +115,23 @@ function updateSongPreview(): void {
                 }
                 if (songArtistInput) {
                     songArtistInput.value = songArtistText || 'Unknown Artist';
+                    // Make sure it's editable
+                    songArtistInput.disabled = false;
                 }
                 
                 // Show the input fields
                 songInputFields.style.display = 'grid';
                 
-                console.log('Final extracted:', { 
+                // If artist couldn't be extracted, let user know they can edit it
+                if (songArtistText === 'Unknown Artist') {
+                    console.warn('⚠️ Could not extract artist name. Please manually enter it in the Artist field.');
+                    if (songArtistInput) {
+                        songArtistInput.placeholder = 'Enter artist name manually';
+                        songArtistInput.focus();
+                    }
+                }
+                
+                console.log('Final result:', { 
                     title: songTitleText,
                     artist: songArtistText
                 });

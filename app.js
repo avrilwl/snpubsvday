@@ -98,10 +98,20 @@ function updateSongPreview() {
                 }
                 if (songArtistInput) {
                     songArtistInput.value = songArtistText || 'Unknown Artist';
+                    songArtistInput.disabled = false;
                 }
                 
                 // Show the input fields
                 songInputFields.style.display = 'grid';
+                
+                // If artist couldn't be extracted, let user know they can edit it
+                if (songArtistText === 'Unknown Artist') {
+                    console.warn('Could not extract artist name. Please manually enter it in the Artist field.');
+                    if (songArtistInput) {
+                        songArtistInput.placeholder = 'Enter artist name manually';
+                        songArtistInput.focus();
+                    }
+                }
                 
                 console.log('Final extracted:', { 
                     title: songTitleText,
