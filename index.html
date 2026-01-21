@@ -83,6 +83,24 @@
                         <span class="error" id="messageError"></span>
                     </div>
 
+                    <div class="form-group full-width">
+                        <label for="spotifyUrl">🎵 Spotify Song (Optional)</label>
+                        <p class="hint">Paste a Spotify song link (e.g., open.spotify.com/track/...)</p>
+                        <input 
+                            type="text" 
+                            id="spotifyUrl" 
+                            name="spotifyUrl" 
+                            placeholder="https://open.spotify.com/track/..."
+                        >
+                        <div id="songPreview" class="song-preview" style="display: none;">
+                            <div class="song-info">
+                                <div class="song-title" id="songTitle"></div>
+                                <div class="song-artist" id="songArtist"></div>
+                            </div>
+                        </div>
+                        <span class="error" id="spotifyUrlError"></span>
+                    </div>
+
                     <button type="submit" class="submit-btn">Submit Dedication</button>
                 </form>
             </section>

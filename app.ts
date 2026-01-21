@@ -5,6 +5,9 @@ interface Dedication {
     recipientName: string;
     recipientClass: string;
     message: string;
+    spotifyUrl?: string;
+    songTitle?: string;
+    songArtist?: string;
     timestamp: Date;
 }
 
@@ -20,12 +23,17 @@ const recipientClass = document.getElementById('recipientClass') as HTMLInputEle
 const message = document.getElementById('message') as HTMLTextAreaElement;
 const wordCount = document.getElementById('wordCount') as HTMLElement;
 const dedicationsList = document.getElementById('dedicationsList') as HTMLElement;
+const spotifyUrl = document.getElementById('spotifyUrl') as HTMLInputElement;
+const songPreview = document.getElementById('songPreview') as HTMLElement;
+const songTitle = document.getElementById('songTitle') as HTMLElement;
+const songArtist = document.getElementById('songArtist') as HTMLElement;
 
 const MAX_WORDS = 30;
 
 // Event Listeners
 form.addEventListener('submit', handleFormSubmit);
 message.addEventListener('input', updateWordCount);
+spotifyUrl.addEventListener('input', updateSongPreview);
 
 // Word count update
 function updateWordCount(): void {
@@ -39,6 +47,32 @@ function updateWordCount(): void {
         wordCountElement.classList.add('warning');
     } else {
         wordCountElement.classList.remove('warning');
+    }
+}
+
+// Update song preview from Spotify URL
+function updateSongPreview(): void {
+    const url = spotifyUrl.value.trim();
+    
+    if (!url) {
+        songPreview.style.display = 'none';
+        return;
+    }
+
+    // Extract track ID from Spotify URL
+    const trackMatch = url.match(/track\/([a-zA-Z0-9]+)/);
+    
+    if (trackMatch && trackMatch[1]) {
+        const trackId = trackMatch[1];
+        // Fetch Spotify metadata using public APIs would require authentication
+        // For now, we'll extract and display the URL or show a generic preview
+        
+        // Parse URL to show basic info
+        songTitle.textContent = 'Spotify Song Selected';
+        songArtist.textContent = 'Click the link above to preview';
+        songPreview.style.display = 'block';
+    } else {
+        songPreview.style.display = 'none';
     }
 }
 
@@ -121,6 +155,9 @@ function handleFormSubmit(e: Event): void {
         recipientName: recipientName.value.trim(),
         recipientClass: recipientClass.value.trim(),
         message: message.value.trim(),
+        spotifyUrl: spotifyUrl.value.trim() || undefined,
+        songTitle: songTitle.textContent || undefined,
+        songArtist: songArtist.textContent || undefined,
         timestamp: new Date()
     };
 
@@ -154,6 +191,11 @@ function renderDedications(): void {
 // Create a dedication card HTML
 function createDedicationCard(dedication: Dedication, index: number): string {
     const formattedTime = formatDate(dedication.timestamp);
+    const spotifySection = dedication.spotifyUrl ? `
+        <div class="dedication-song">
+            🎵 <strong>Song Dedication:</strong> <a href="${escapeHtml(dedication.spotifyUrl)}" target="_blank" rel="noopener noreferrer">Listen on Spotify</a>
+        </div>
+    ` : '';
     
     return `
         <div class="dedication-card">
@@ -163,6 +205,7 @@ function createDedicationCard(dedication: Dedication, index: number): string {
                 <span>💝 To: <strong>${escapeHtml(dedication.recipientName)}</strong> (${escapeHtml(dedication.recipientClass)})</span>
             </div>
             <p class="dedication-message">"${escapeHtml(dedication.message)}"</p>
+            ${spotifySection}
             <small style="color: #95a5a6; margin-top: 10px; display: block;">${formattedTime}</small>
         </div>
     `;

@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap');
+
 * {
     margin: 0;
     padding: 0;
@@ -5,18 +7,20 @@
 }
 
 :root {
-    --primary-color: #e74c3c;
-    --secondary-color: #c0392b;
-    --light-pink: #f8e6ea;
-    --dark-text: #2c3e50;
-    --border-color: #ecf0f1;
-    --success-color: #27ae60;
-    --error-color: #e74c3c;
+    --primary-color: #ffb3d9;
+    --secondary-color: #ff9ec9;
+    --light-pink: #fce4ec;
+    --medium-pink: #f8bbd0;
+    --dark-pink: #ec407a;
+    --dark-text: #3e2723;
+    --border-color: #ffcdd2;
+    --success-color: #e91e63;
+    --error-color: #ff9ec9;
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    background: linear-gradient(135deg, #ffb3d9 0%, #ff9ec9 100%);
     min-height: 100vh;
     padding: 20px;
     color: var(--dark-text);
@@ -32,7 +36,7 @@ body {
 }
 
 header {
-    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    background: linear-gradient(135deg, #ffb3d9, #ff9ec9);
     color: white;
     padding: 40px 20px;
     text-align: center;
@@ -131,6 +135,32 @@ main {
     color: var(--primary-color);
 }
 
+.song-preview {
+    margin-top: 12px;
+    padding: 12px;
+    background: white;
+    border-radius: 6px;
+    border-left: 4px solid var(--dark-pink);
+}
+
+.song-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.song-title {
+    font-weight: 600;
+    color: var(--dark-text);
+    font-size: 0.95rem;
+}
+
+.song-artist {
+    font-size: 0.85rem;
+    color: #7f8c8d;
+    font-style: italic;
+}
+
 .error {
     color: var(--error-color);
     font-size: 0.85rem;
@@ -145,7 +175,7 @@ main {
 .submit-btn {
     width: 100%;
     padding: 14px;
-    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    background: linear-gradient(135deg, #ffb3d9, #ff9ec9);
     color: white;
     border: none;
     border-radius: 6px;
@@ -158,7 +188,7 @@ main {
 
 .submit-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+    box-shadow: 0 5px 15px rgba(255, 179, 217, 0.4);
 }
 
 .submit-btn:active {
@@ -192,7 +222,7 @@ main {
     background: var(--light-pink);
     padding: 20px;
     border-radius: 8px;
-    border-left: 4px solid var(--primary-color);
+    border-left: 4px solid var(--dark-pink);
     animation: slideIn 0.3s ease;
 }
 
@@ -234,6 +264,27 @@ main {
     background: white;
     padding: 12px;
     border-radius: 4px;
+}
+
+.dedication-song {
+    margin-top: 12px;
+    padding: 10px;
+    background: white;
+    border-radius: 4px;
+    border-left: 3px solid var(--success-color);
+    font-size: 0.95rem;
+}
+
+.dedication-song a {
+    color: var(--success-color);
+    text-decoration: none;
+    font-weight: 600;
+    transition: opacity 0.2s ease;
+}
+
+.dedication-song a:hover {
+    opacity: 0.8;
+    text-decoration: underline;
 }
 
 .no-dedications {

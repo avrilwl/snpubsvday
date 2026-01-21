@@ -10,12 +10,17 @@ const recipientClass = document.getElementById('recipientClass');
 const message = document.getElementById('message');
 const wordCount = document.getElementById('wordCount');
 const dedicationsList = document.getElementById('dedicationsList');
+const spotifyUrl = document.getElementById('spotifyUrl');
+const songPreview = document.getElementById('songPreview');
+const songTitle = document.getElementById('songTitle');
+const songArtist = document.getElementById('songArtist');
 
 const MAX_WORDS = 30;
 
 // Event Listeners
 form.addEventListener('submit', handleFormSubmit);
 message.addEventListener('input', updateWordCount);
+spotifyUrl.addEventListener('input', updateSongPreview);
 
 // Word count update
 function updateWordCount() {
@@ -29,6 +34,32 @@ function updateWordCount() {
         wordCountElement.classList.add('warning');
     } else {
         wordCountElement.classList.remove('warning');
+    }
+}
+
+// Update song preview from Spotify URL
+function updateSongPreview() {
+    const url = spotifyUrl.value.trim();
+    
+    if (!url) {
+        songPreview.style.display = 'none';
+        return;
+    }
+
+    // Extract track ID from Spotify URL
+    const trackMatch = url.match(/track\/([a-zA-Z0-9]+)/);
+    
+    if (trackMatch && trackMatch[1]) {
+        const trackId = trackMatch[1];
+        // Fetch Spotify metadata using public APIs would require authentication
+        // For now, we'll extract and display the URL or show a generic preview
+        
+        // Parse URL to show basic info
+        songTitle.textContent = 'Spotify Song Selected';
+        songArtist.textContent = 'Click the link above to preview';
+        songPreview.style.display = 'block';
+    } else {
+        songPreview.style.display = 'none';
     }
 }
 
