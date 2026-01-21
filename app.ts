@@ -70,16 +70,42 @@ function updateSongPreview(): void {
                 let songTitleText = 'Unknown Title';
                 let songArtistText = 'Unknown Artist';
                 
+                console.log('Raw Spotify response:', data);
+                
                 // Try to extract from title field (format: "Song Title by Artist Name")
                 if (data.title) {
                     const titleParts = data.title.split(' by ');
-                    songTitleText = titleParts[0]?.trim() || 'Unknown Title';
-                    songArtistText = titleParts[1]?.trim() || 'Unknown Artist';
+                    if (titleParts.length > 1) {
+                        songTitleText = titleParts[0].trim();
+                        songArtistText = titleParts[1].trim();
+                    } else {
+                        songTitleText = data.title.trim();
+                    }
                 }
                 
-                // Also check for author_name field which might contain artist info
-                if (data.author_name && songArtistText === 'Unknown Artist') {
-                    songArtistText = data.author_name;
+                // Fallback to author_name field if artist is still unknown
+                if (songArtistText === 'Unknown Artist' && data.author_name) {
+                    songArtistText = data.author_name.trim();
+                }
+                
+                // If still unknown, try to extract from HTML
+                if (songArtistText === 'Unknown Artist' && data.html) {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = data.html;
+                    const text = tempDiv.textContent || tempDiv.innerText || '';
+                    // Look for pattern like "Song - Artist" in the HTML
+                    const match = text.match(/(.+?)\s*[-–]\s*(.+)/);
+                    if (match && match[2]) {
+                        const extracted = match[2].trim();
+                        if (extracted && extracted !== 'Spotify' && extracted.length > 0) {
+                            songArtistText = extracted;
+                        }
+                    }
+                }
+                
+                // If still unknown, check provider_name
+                if (songArtistText === 'Unknown Artist' && data.provider_name) {
+                    songArtistText = data.provider_name;
                 }
                 
                 // Update input fields
@@ -92,7 +118,11 @@ function updateSongPreview(): void {
                 // Show the input fields
                 songInputFields.style.display = 'grid';
                 
-                console.log('Spotify metadata:', { title: songTitleText, artist: songArtistText, data });
+                console.log('Spotify metadata extracted:', { 
+                    title: songTitleText, 
+                    artist: songArtistText, 
+                    oEmbedResponse: data 
+                });
             })
             .catch(error => {
                 console.error('Error fetching Spotify metadata:', error);
@@ -199,6 +229,7 @@ function handleFormSubmit(e: Event): void {
     form.reset();
     updateWordCount();
     clearAllErrors();
+    songInputFields.style.display = 'none';
 
     // Re-render dedications list
     renderDedications();
