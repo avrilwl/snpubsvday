@@ -51,14 +51,14 @@ header h1 {
     font-size: 2.5rem;
     margin-bottom: 10px;
     font-weight: 700;
-    color: var(--medium-pink);
+    color: var(--dark-pink);
 }
 
 header .subtitle {
     font-size: 1.1rem;
     opacity: 0.95;
     font-weight: 300;
-    color: var(--medium-pink);
+    color: var(--dark-pink);
 }
 
 main {
@@ -250,6 +250,34 @@ main {
     color: var(--dark-pink);
     font-size: 1.1rem;
     margin-bottom: 8px;
+}
+
+.dedication-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.delete-btn {
+    background: transparent;
+    border: none;
+    color: var(--dark-pink);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.delete-btn:hover {
+    background-color: rgba(236, 64, 122, 0.1);
+    transform: scale(1.2);
 }
 
 .dedication-meta {

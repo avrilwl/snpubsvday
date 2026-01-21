@@ -54,20 +54,32 @@ function updateSongPreview() {
         fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`)
             .then(response => response.json())
             .then(data => {
-                // Extract title and artist from the title format "Song Title by Artist Name"
-                const titleParts = data.title.split(' by ');
-                const songTitleText = titleParts[0] || 'Unknown Title';
-                const songArtistText = titleParts[1] || 'Unknown Artist';
+                let songTitleText = 'Unknown Title';
+                let songArtistText = 'Unknown Artist';
+                
+                // Try to extract from title field (format: "Song Title by Artist Name")
+                if (data.title) {
+                    const titleParts = data.title.split(' by ');
+                    songTitleText = titleParts[0]?.trim() || 'Unknown Title';
+                    songArtistText = titleParts[1]?.trim() || 'Unknown Artist';
+                }
+                
+                // Also check for author_name field which might contain artist info
+                if (data.author_name && songArtistText === 'Unknown Artist') {
+                    songArtistText = data.author_name;
+                }
                 
                 // Update input fields
                 const songTitleInput = document.getElementById('songTitle');
                 const songArtistInput = document.getElementById('songArtist');
                 
-                songTitleInput.value = songTitleText;
-                songArtistInput.value = songArtistText;
+                if (songTitleInput) songTitleInput.value = songTitleText;
+                if (songArtistInput) songArtistInput.value = songArtistText;
                 
                 // Show the input fields
                 songInputFields.style.display = 'grid';
+                
+                console.log('Spotify metadata:', { title: songTitleText, artist: songArtistText, data });
             })
             .catch(error => {
                 console.error('Error fetching Spotify metadata:', error);
@@ -202,7 +214,10 @@ function createDedicationCard(dedication, index) {
     
     return `
         <div class="dedication-card">
-            <h3>💌 ${escapeHtml(dedication.recipientName)}</h3>
+            <div class="dedication-header">
+                <h3>💌 ${escapeHtml(dedication.recipientName)}</h3>
+                <button class="delete-btn" onclick="deleteDedication(${index})" title="Delete dedication">✕</button>
+            </div>
             <div class="dedication-meta">
                 <span>📝 From: <strong>${escapeHtml(dedication.senderName)}</strong> (${escapeHtml(dedication.senderClass)})</span>
                 <span>💝 To: <strong>${escapeHtml(dedication.recipientName)}</strong> (${escapeHtml(dedication.recipientClass)})</span>
@@ -274,3 +289,12 @@ function loadDedications() {
 
 // Initial render
 renderDedications();
+
+// Delete dedication function
+function deleteDedication(index) {
+    if (confirm('Are you sure you want to delete this dedication?')) {
+        dedications.splice(index, 1);
+        saveDedications(dedications);
+        renderDedications();
+    }
+}
