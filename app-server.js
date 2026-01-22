@@ -1,5 +1,5 @@
-// Initialize dedications array from localStorage
-let dedications = loadDedications();
+// Initialize dedications array
+let dedications = [];
 
 // DOM Elements
 const form = document.getElementById('dedicationForm');
@@ -14,11 +14,19 @@ const spotifyUrl = document.getElementById('spotifyUrl');
 const songInputFields = document.getElementById('songInputFields');
 
 const MAX_WORDS = 30;
+const API_BASE = '/api';
 
 // Event Listeners
 form.addEventListener('submit', handleFormSubmit);
 message.addEventListener('input', updateWordCount);
 spotifyUrl.addEventListener('input', updateSongPreview);
+
+// Load dedications from server on page load
+window.addEventListener('load', () => {
+    loadDedicationsFromServer();
+    // Refresh dedications every 3 seconds to see new posts from other devices
+    setInterval(loadDedicationsFromServer, 3000);
+});
 
 // Word count update
 function updateWordCount() {
@@ -100,7 +108,7 @@ function updateSongPreview() {
                     songArtistInput.value = songArtistText || 'Unknown Artist';
                     songArtistInput.disabled = false;
                 }
-                    
+                
                 // Show the input fields
                 songInputFields.style.display = 'grid';
                 
@@ -120,7 +128,6 @@ function updateSongPreview() {
             })
             .catch(error => {
                 console.error('Error fetching Spotify metadata:', error);
-                // Show input fields anyway so user can enter manually
                 songInputFields.style.display = 'grid';
             });
     } else {
@@ -188,8 +195,8 @@ function showError(elementId, message) {
 function clearAllErrors() {
     const errorElements = document.querySelectorAll('.error');
     errorElements.forEach(element => {
-        element.classList.remove('show');
         element.textContent = '';
+        element.classList.remove('show');
     });
 }
 
@@ -210,23 +217,51 @@ function handleFormSubmit(e) {
         spotifyUrl: spotifyUrl.value.trim() || undefined,
         songTitle: document.getElementById('songTitle')?.value || undefined,
         songArtist: document.getElementById('songArtist')?.value || undefined,
-        timestamp: new Date()
+        timestamp: new Date().toISOString()
     };
 
-    // Add to dedications array
-    dedications.unshift(newDedication);
+    // Send to server
+    fetch(`${API_BASE}/dedications`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newDedication)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to save dedication');
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Reset form
+        form.reset();
+        updateWordCount();
+        clearAllErrors();
+        songInputFields.style.display = 'none';
+        spotifyUrl.value = '';
+        
+        // Reload dedications to show the new post
+        loadDedicationsFromServer();
+    })
+    .catch(error => {
+        console.error('Error saving dedication:', error);
+        showError('messageError', 'Error saving dedication. Please try again.');
+    });
+}
 
-    // Save to localStorage
-    saveDedications(dedications);
-
-    // Reset form
-    form.reset();
-    updateWordCount();
-    clearAllErrors();
-    songInputFields.style.display = 'none';
-
-    // Re-render dedications list
-    renderDedications();
+// Load dedications from server
+function loadDedicationsFromServer() {
+    fetch(`${API_BASE}/dedications`)
+        .then(response => response.json())
+        .then(data => {
+            dedications = data;
+            renderDedications();
+        })
+        .catch(error => {
+            console.error('Error loading dedications:', error);
+        });
 }
 
 // Render all dedications
@@ -243,7 +278,7 @@ function renderDedications() {
 
 // Create a dedication card HTML
 function createDedicationCard(dedication, index) {
-    const formattedTime = formatDate(dedication.timestamp);
+    const formattedTime = formatDate(new Date(dedication.timestamp));
     const spotifySection = dedication.spotifyUrl ? `
         <div class="dedication-song">
             🎵 <a href="${escapeHtml(dedication.spotifyUrl)}" target="_blank" rel="noopener noreferrer"><strong>${escapeHtml(dedication.songTitle || 'Unknown Title')}</strong> - ${escapeHtml(dedication.songArtist || 'Unknown Artist')}</a>
@@ -302,37 +337,22 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// localStorage functions
-function saveDedications(data) {
-    localStorage.setItem('valentineDedications', JSON.stringify(data));
-}
-
-function loadDedications() {
-    try {
-        const data = localStorage.getItem('valentineDedications');
-        if (!data) {
-            return [];
-        }
-        const parsed = JSON.parse(data);
-        // Convert string timestamps back to Date objects
-        return parsed.map((d) => ({
-            ...d,
-            timestamp: new Date(d.timestamp)
-        }));
-    } catch (error) {
-        console.error('Error loading dedications:', error);
-        return [];
-    }
-}
-
-// Initial render
-renderDedications();
-
 // Delete dedication function
 function deleteDedication(index) {
     if (confirm('Are you sure you want to delete this dedication?')) {
-        dedications.splice(index, 1);
-        saveDedications(dedications);
-        renderDedications();
+        fetch(`${API_BASE}/dedications/${index}`, {
+            method: 'DELETE'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to delete dedication');
+            }
+            // Reload dedications
+            loadDedicationsFromServer();
+        })
+        .catch(error => {
+            console.error('Error deleting dedication:', error);
+            alert('Failed to delete dedication');
+        });
     }
 }
