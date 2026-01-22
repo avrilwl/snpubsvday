@@ -199,11 +199,11 @@ form {
 /* Dedications Section */
 .dedications-section {
     grid-column: 1 / -1;
-    background: var(--light-pink);
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border-left: 5px solid var(--dark-pink);
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+    border-left: none;
 }
 
 .dedications-section h2 {
@@ -220,24 +220,12 @@ form {
 
 /* Dedication Card */
 .dedication-card {
-    background: var(--light-pink);
+    background: white;
     border: 2px solid var(--dark-pink);
     border-left: 5px solid var(--dark-pink);
     border-radius: 8px;
     padding: 20px;
     transition: all 0.3s ease;
-    animation: slideIn 0.4s ease;
-}
-
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 
 .dedication-card:hover {
@@ -339,7 +327,7 @@ form {
 
 .no-dedications {
     text-align: center;
-    color: #999;
+    color: white;
     padding: 40px 20px;
     font-size: 1.1rem;
     grid-column: 1 / -1;
@@ -349,7 +337,7 @@ form {
 footer {
     text-align: center;
     padding: 20px;
-    color: #666;
+    color: white;
     font-size: 0.9rem;
     margin-top: 40px;
 }

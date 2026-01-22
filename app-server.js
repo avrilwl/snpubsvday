@@ -256,8 +256,14 @@ function loadDedicationsFromServer() {
     fetch(`${API_BASE}/dedications`)
         .then(response => response.json())
         .then(data => {
-            dedications = data;
-            renderDedications();
+            const newLength = data.length;
+            const oldLength = dedications.length;
+            
+            // Only re-render if the number of dedications changed
+            if (newLength !== oldLength) {
+                dedications = data;
+                renderDedications();
+            }
         })
         .catch(error => {
             console.error('Error loading dedications:', error);
