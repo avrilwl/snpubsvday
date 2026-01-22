@@ -217,7 +217,7 @@ form {
 }
 
 .dedications-section h2 {
-    color: white;
+    color: var(--light-pink);
     margin-bottom: 20px;
     font-size: 1.5rem;
 }
