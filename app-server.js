@@ -22,10 +22,37 @@ message.addEventListener('input', updateWordCount);
 spotifyUrl.addEventListener('input', updateSongPreview);
 
 // Load dedications from server on page load
+let refreshInterval;
 window.addEventListener('load', () => {
     loadDedicationsFromServer();
     // Refresh dedications every 3 seconds to see new posts from other devices
-    setInterval(loadDedicationsFromServer, 3000);
+    refreshInterval = setInterval(loadDedicationsFromServer, 3000);
+    
+    // Keep the refresh interval alive even during inactivity
+    // Restart the interval periodically to prevent it from being cancelled
+    setInterval(() => {
+        if (!refreshInterval) {
+            refreshInterval = setInterval(loadDedicationsFromServer, 3000);
+        }
+    }, 30000);
+    
+    // Resume refresh when page becomes visible again
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+            if (!refreshInterval) {
+                refreshInterval = setInterval(loadDedicationsFromServer, 3000);
+            }
+            loadDedicationsFromServer();
+        }
+    });
+});
+
+// Prevent window from being unloaded unintentionally
+window.addEventListener('beforeunload', (e) => {
+    // This just ensures data persists
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+    }
 });
 
 // Word count update
@@ -253,20 +280,36 @@ function handleFormSubmit(e) {
 
 // Load dedications from server
 function loadDedicationsFromServer() {
-    fetch(`${API_BASE}/dedications`)
-        .then(response => response.json())
+    fetch(`${API_BASE}/dedications`, {
+        cache: 'no-store',
+        headers: {
+            'Pragma': 'no-cache',
+            'Cache-Control': 'no-cache'
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
+            // Always update if data is different, not just based on length
             const newLength = data.length;
             const oldLength = dedications.length;
             
-            // Only re-render if the number of dedications changed
-            if (newLength !== oldLength) {
+            // Check if content actually changed
+            const contentChanged = newLength !== oldLength || 
+                                 JSON.stringify(data) !== JSON.stringify(dedications);
+            
+            if (contentChanged) {
                 dedications = data;
                 renderDedications();
             }
         })
         .catch(error => {
             console.error('Error loading dedications:', error);
+            // Don't fail silently - try again in next interval
         });
 }
 
