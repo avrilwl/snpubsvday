@@ -1,0 +1,16 @@
+runtime: python311
+
+entrypoint: gunicorn -b :$PORT server:app
+
+env: standard
+
+env_variables:
+  FLASK_ENV: "production"
+
+automatic_scaling:
+  min_instances: 1
+  max_instances: 10
+
+handlers:
+  - url: /.*
+    script: auto

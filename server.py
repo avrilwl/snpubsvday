@@ -91,6 +91,8 @@ def delete_dedication(index):
         return jsonify({'error': 'Failed to delete dedication'}), 500
 
 if __name__ == '__main__':
-    print("Valentine's Day Dedications server running on http://localhost:3000")
+    # Get port from environment variable or default to 8080
+    port = int(os.environ.get('PORT', 8080))
+    print(f"Valentine's Day Dedications server running on http://0.0.0.0:{port}")
     print("Posts are now shared across all devices!")
-    app.run(host='localhost', port=3000, debug=True)
+    app.run(host='0.0.0.0', port=port, debug=False)
