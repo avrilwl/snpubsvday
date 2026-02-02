@@ -94,34 +94,54 @@ function updateSongPreview() {
                 
                 console.log('Raw Spotify oEmbed response:', JSON.stringify(data, null, 2));
                 
-                // Primary method: Extract from title field
-                if (data.title && typeof data.title === 'string') {
-                    const title = data.title.trim();
-                    console.log('Title field:', title);
-                    
-                    // Try splitting by " by "
-                    if (title.includes(' by ')) {
-                        const parts = title.split(' by ');
-                        songTitleText = parts[0].trim();
-                        songArtistText = parts.slice(1).join(' by ').trim();
-                        console.log('Extracted using " by ": title="' + songTitleText + '", artist="' + songArtistText + '"');
-                    } else {
-                        // If no " by ", the whole thing might be in title
-                        songTitleText = title;
-                        console.log('No " by " found, using full title:', songTitleText);
-                    }
-                }
-                
-                // Fallback: Check if artist_name exists (some versions of the API)
-                if ((songArtistText === 'Unknown Artist' || songArtistText === '') && data.artist_name) {
+                // Method 1: Check if artist_name exists in the response
+                if (data.artist_name) {
                     songArtistText = data.artist_name.trim();
                     console.log('Using artist_name field:', songArtistText);
                 }
                 
-                // Last resort: Try to extract from author_name if it's not just "Spotify"
-                if ((songArtistText === 'Unknown Artist' || songArtistText === '') && data.author_name && data.author_name !== 'Spotify') {
+                // Method 2: Check if author_name exists and is not "Spotify"
+                if ((songArtistText === 'Unknown Artist') && data.author_name && data.author_name !== 'Spotify') {
                     songArtistText = data.author_name.trim();
                     console.log('Using author_name field:', songArtistText);
+                }
+                
+                // Method 3: Try to extract from title field (older API format)
+                if (data.title && typeof data.title === 'string') {
+                    const title = data.title.trim();
+                    console.log('Title field:', title);
+                    
+                    // Check if title contains artist information
+                    // Pattern 1: "Song Title - Artist Name"
+                    if (title.includes(' - ')) {
+                        const parts = title.split(' - ');
+                        if (parts.length >= 2) {
+                            songTitleText = parts[0].trim();
+                            if (songArtistText === 'Unknown Artist') {
+                                songArtistText = parts.slice(1).join(' - ').trim();
+                            }
+                            console.log('Extracted using " - ": title="' + songTitleText + '", artist="' + songArtistText + '"');
+                        }
+                    }
+                    // Pattern 2: "Song Title by Artist Name"  
+                    else if (title.includes(' by ')) {
+                        const parts = title.split(' by ');
+                        songTitleText = parts[0].trim();
+                        if (songArtistText === 'Unknown Artist') {
+                            songArtistText = parts.slice(1).join(' by ').trim();
+                        }
+                        console.log('Extracted using " by ": title="' + songTitleText + '", artist="' + songArtistText + '"');
+                    }
+                    // Pattern 3: Just the song title
+                    else {
+                        songTitleText = title;
+                        console.log('No artist in title, using title as song name:', songTitleText);
+                    }
+                }
+                
+                // Method 4: If we still don't have a title, use a generic one
+                if (songTitleText === 'Unknown Title' && data.title) {
+                    songTitleText = data.title.trim();
                 }
                 
                 // Update input fields with trimmed values
@@ -141,9 +161,9 @@ function updateSongPreview() {
                 
                 // If artist couldn't be extracted, let user know they can edit it
                 if (songArtistText === 'Unknown Artist') {
-                    console.warn('Could not extract artist name. Please manually enter it in the Artist field.');
+                    console.warn('Could not extract artist name from Spotify. Please enter it manually.');
                     if (songArtistInput) {
-                        songArtistInput.placeholder = 'Enter artist name manually';
+                        songArtistInput.placeholder = 'Enter artist name (Spotify didn\'t provide it)';
                         songArtistInput.focus();
                     }
                 }
@@ -155,7 +175,13 @@ function updateSongPreview() {
             })
             .catch(error => {
                 console.error('Error fetching Spotify metadata:', error);
+                // Show input fields anyway so user can enter manually
                 songInputFields.style.display = 'grid';
+                const songArtistInput = document.getElementById('songArtist');
+                if (songArtistInput) {
+                    songArtistInput.placeholder = 'Enter artist name (Spotify API error)';
+                    songArtistInput.focus();
+                }
             });
     } else {
         songInputFields.style.display = 'none';
