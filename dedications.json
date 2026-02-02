@@ -1,0 +1,10 @@
+[
+  {
+    "senderName": "Test User",
+    "senderClass": "4A",
+    "recipientName": "Test Friend",
+    "recipientClass": "4B",
+    "message": "This is a test dedication using JSON storage!",
+    "timestamp": "2026-02-02T17:36:23.470907"
+  }
+]
