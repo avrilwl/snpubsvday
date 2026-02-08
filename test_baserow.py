@@ -119,8 +119,8 @@ class TestBaserowIntegration(unittest.TestCase):
         # Check URL
         self.assertIn("https://api.baserow.io/api/database/rows/table/831485/?user_field_names=true", args[0])
         
-        # Check headers
-        self.assertEqual(kwargs["headers"]["Authorization"], "Token dedi")
+        # Check headers - using the token from app.yaml
+        self.assertEqual(kwargs["headers"]["Authorization"], "Token lx3pu0Jovlbaujjilm270IeMxdPbZTr4")
         
         # Check data
         data = kwargs["json"]

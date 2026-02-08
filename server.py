@@ -13,7 +13,8 @@ print("✅ Valentine's Day Dedications - Using Baserow Database")
 
 # Baserow API Configuration
 BASEROW_API_URL = "https://api.baserow.io/api/database/rows/table/831485"
-BASEROW_TOKEN = os.environ.get("BASEROW_TOKEN", "dedi")  # Get token from environment variable
+# Use environment variable if available, otherwise use hardcoded token for deployment
+BASEROW_TOKEN = os.environ.get("BASEROW_TOKEN", "lx3pu0Jovlbaujjilm270IeMxdPbZTr4")
 HEADERS = {
     "Authorization": f"Token {BASEROW_TOKEN}",
     "Content-Type": "application/json"
