@@ -66,35 +66,18 @@ def save_dedication(dedication_data):
     """Save a dedication to Baserow"""
     try:
         # Map our app fields to Baserow fields
+        # Include ALL fields as shown in the Baserow API example
         baserow_data = {
             "Sendername": dedication_data.get("senderName", ""),
             "Senderclass": dedication_data.get("senderClass", ""),
             "Receipientsname": dedication_data.get("recipientName", ""),  # Note: typo in Baserow field name
             "Receipientclass": dedication_data.get("recipientClass", ""),  # Note: typo in Baserow field name
             "Message": dedication_data.get("message", ""),
+            "Song": dedication_data.get("spotifyUrl", "https://baserow.io"),  # Default value as per example
+            "Artistname": dedication_data.get("songArtist", ""),  # Empty string if not provided
+            "Songtitle": dedication_data.get("songTitle", ""),  # Empty string if not provided
+            "Timestamp": dedication_data.get("timestamp", "")  # Empty string if not provided
         }
-        
-        # Only include Song field if spotifyUrl is provided and not empty
-        spotify_url = dedication_data.get("spotifyUrl")
-        if spotify_url:
-            baserow_data["Song"] = spotify_url
-            
-            # Save song title and artist to new Baserow fields
-            song_title = dedication_data.get("songTitle")
-            if song_title:
-                baserow_data["Songtitle"] = song_title
-            
-            song_artist = dedication_data.get("songArtist")
-            if song_artist:
-                baserow_data["Artistname"] = song_artist
-        else:
-            # If no Spotify URL, set to empty string (or omit if Baserow allows)
-            baserow_data["Song"] = ""
-        
-        # Save timestamp to Baserow Timestamp field
-        timestamp = dedication_data.get("timestamp")
-        if timestamp:
-            baserow_data["Timestamp"] = timestamp
         
         response = requests.post(
             f"{BASEROW_API_URL}/?user_field_names=true",
