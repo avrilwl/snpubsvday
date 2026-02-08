@@ -337,7 +337,12 @@ function renderDedications() {
         return;
     }
 
-    dedicationsList.innerHTML = dedications
+    // Sort dedications by timestamp (newest first) to ensure correct display order
+    const sortedDedications = [...dedications].sort((a, b) => {
+        return new Date(b.timestamp) - new Date(a.timestamp);
+    });
+    
+    dedicationsList.innerHTML = sortedDedications
         .map((dedication, index) => createDedicationCard(dedication, index))
         .join('');
 }
