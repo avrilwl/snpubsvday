@@ -320,18 +320,9 @@ function loadDedicationsFromServer() {
             return response.json();
         })
         .then(data => {
-            // Always update if data is different, not just based on length
-            const newLength = data.length;
-            const oldLength = dedications.length;
-            
-            // Check if content actually changed
-            const contentChanged = newLength !== oldLength || 
-                                 JSON.stringify(data) !== JSON.stringify(dedications);
-            
-            if (contentChanged) {
-                dedications = data;
-                renderDedications();
-            }
+            // Always update with server data - server returns dedications sorted newest first
+            dedications = data;
+            renderDedications();
         })
         .catch(error => {
             console.error('Error loading dedications:', error);
