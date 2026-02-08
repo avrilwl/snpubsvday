@@ -79,16 +79,75 @@ def save_dedication(dedication_data):
             "Timestamp": dedication_data.get("timestamp", "")  # Empty string if not provided
         }
         
+        print(f"🔄 DEBUG: Attempting to save dedication to Baserow...")
+        print(f"🔄 DEBUG: Baserow API URL: {BASEROW_API_URL}/?user_field_names=true")
+        print(f"🔄 DEBUG: Request data: {json.dumps(baserow_data, indent=2)}")
+        
         response = requests.post(
             f"{BASEROW_API_URL}/?user_field_names=true",
             headers=HEADERS,
-            json=baserow_data
+            json=baserow_data,
+            timeout=10
         )
+        
+        print(f"🔄 DEBUG: Baserow response status: {response.status_code}")
+        print(f"🔄 DEBUG: Baserow response headers: {dict(response.headers)}")
+        
+        # Check for specific error status codes
+        if response.status_code == 401:
+            print(f"❌ ERROR: Baserow authentication failed (401)")
+            print(f"❌ ERROR: Token used: {BASEROW_TOKEN[:10]}...")
+            print(f"❌ ERROR: Full response: {response.text}")
+            raise Exception("Baserow authentication failed - check API token")
+        elif response.status_code == 403:
+            print(f"❌ ERROR: Baserow permission denied (403)")
+            print(f"❌ ERROR: Token may not have access to table 831485")
+            print(f"❌ ERROR: Full response: {response.text}")
+            raise Exception("Baserow permission denied - check table access")
+        elif response.status_code == 404:
+            print(f"❌ ERROR: Baserow table not found (404)")
+            print(f"❌ ERROR: Table ID 831485 may not exist")
+            print(f"❌ ERROR: Full response: {response.text}")
+            raise Exception("Baserow table not found - check table ID")
+        elif response.status_code >= 400:
+            print(f"❌ ERROR: Baserow API error: {response.status_code}")
+            print(f"❌ ERROR: Full response: {response.text}")
+            raise Exception(f"Baserow API error: {response.status_code}")
+        
         response.raise_for_status()
-        return response.json()
+        
+        result = response.json()
+        print(f"✅ DEBUG: Baserow save successful!")
+        print(f"✅ DEBUG: Created row ID: {result.get('id')}")
+        print(f"✅ DEBUG: Full response: {json.dumps(result, indent=2)}")
+        return result
+        
+    except requests.exceptions.ConnectTimeout:
+        print(f"❌ ERROR: Connection timeout to Baserow API")
+        print(f"❌ ERROR: URL: {BASEROW_API_URL}")
+        print(f"❌ ERROR: Check network connectivity to api.baserow.io")
+        raise Exception("Connection timeout to Baserow - check network")
+    except requests.exceptions.ConnectionError:
+        print(f"❌ ERROR: Connection error to Baserow API")
+        print(f"❌ ERROR: URL: {BASEROW_API_URL}")
+        print(f"❌ ERROR: Cannot connect to api.baserow.io")
+        raise Exception("Cannot connect to Baserow - check network/firewall")
+    except requests.exceptions.Timeout:
+        print(f"❌ ERROR: Request timeout to Baserow API")
+        print(f"❌ ERROR: Request took too long")
+        raise Exception("Request timeout to Baserow")
+    except requests.exceptions.RequestException as e:
+        print(f"❌ ERROR: Network error saving to Baserow: {e}")
+        if hasattr(e, 'response') and e.response is not None:
+            print(f"❌ ERROR: Baserow response status: {e.response.status_code}")
+            print(f"❌ ERROR: Baserow response text: {e.response.text[:500]}")
+        raise Exception(f"Network error: {str(e)}")
     except Exception as e:
-        print(f"Error saving dedication to Baserow: {e}")
-        raise
+        print(f"❌ ERROR: Unexpected error saving to Baserow: {e}")
+        import traceback
+        print(f"❌ ERROR: Traceback:")
+        traceback.print_exc()
+        raise Exception(f"Unexpected error: {str(e)}")
 
 # Serve static files
 @app.route('/')
