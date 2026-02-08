@@ -54,7 +54,6 @@ This application now uses Google Cloud Firestore for persistent data storage. Th
    - This downloads a JSON file
 
 3. **Create a Secret in Cloud Run:**
-   - Go to [Google Cloud Secrets](https://console.cloud.google.com/security/secret-manager)
    - Create a new secret with your service account key
    - Grant the Cloud Run service account access to this secret
 

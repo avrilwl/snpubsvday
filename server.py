@@ -4,33 +4,108 @@ from flask_cors import CORS
 import os
 from datetime import datetime
 import json
+import requests
 
 app = Flask(__name__)
 CORS(app)
 
-print("✅ Valentine's Day Dedications - Using local JSON file storage")
+print("✅ Valentine's Day Dedications - Using Baserow Database")
 
-DATA_FILE = 'dedications.json'
+# Baserow API Configuration
+BASEROW_API_URL = "https://api.baserow.io/api/database/rows/table/831485"
+BASEROW_TOKEN = os.environ.get("BASEROW_TOKEN", "dedi")  # Get token from environment variable
+HEADERS = {
+    "Authorization": f"Token {BASEROW_TOKEN}",
+    "Content-Type": "application/json"
+}
 
 def load_dedications():
-    """Load dedications from JSON file"""
-    if os.path.exists(DATA_FILE):
-        try:
-            with open(DATA_FILE, 'r') as f:
-                return json.load(f)
-        except:
-            return []
-    return []
-
-def save_dedications(dedications):
-    """Save dedications to JSON file"""
+    """Load dedications from Baserow"""
     try:
-        with open(DATA_FILE, 'w') as f:
-            json.dump(dedications, f, indent=2)
-        return True
+        response = requests.get(
+            f"{BASEROW_API_URL}/?user_field_names=true",
+            headers=HEADERS
+        )
+        response.raise_for_status()
+        data = response.json()
+        
+        # Convert Baserow format to our app format
+        dedications = []
+        for row in data.get("results", []):
+            # Handle field name mapping
+            dedication = {
+                "id": row.get("id"),  # Store Baserow row ID for deletion
+                "senderName": row.get("Sendername", ""),
+                "senderClass": row.get("Senderclass", ""),
+                "recipientName": row.get("Receipientsname", ""),  # Note: typo in Baserow field name
+                "recipientClass": row.get("Receipientclass", ""),  # Note: typo in Baserow field name
+                "message": row.get("Message", ""),
+                # Use Timestamp field from Baserow if available, otherwise use created_on
+                "timestamp": row.get("Timestamp") or row.get("created_on", datetime.now().isoformat())
+            }
+            
+            # Handle song URL if present
+            song_url = row.get("Song")
+            # Check if song_url exists and is not empty/default
+            if song_url and song_url.strip() and song_url != "https://baserow.io":
+                dedication["spotifyUrl"] = song_url
+                # Use the new Baserow fields for song title and artist
+                dedication["songTitle"] = row.get("Songtitle") or None
+                dedication["songArtist"] = row.get("Artistname") or None
+            
+            dedications.append(dedication)
+        
+        # Sort by timestamp (newest first)
+        dedications.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
+        return dedications
     except Exception as e:
-        print(f"Error saving dedications: {e}")
-        return False
+        print(f"Error loading dedications from Baserow: {e}")
+        return []
+
+def save_dedication(dedication_data):
+    """Save a dedication to Baserow"""
+    try:
+        # Map our app fields to Baserow fields
+        baserow_data = {
+            "Sendername": dedication_data.get("senderName", ""),
+            "Senderclass": dedication_data.get("senderClass", ""),
+            "Receipientsname": dedication_data.get("recipientName", ""),  # Note: typo in Baserow field name
+            "Receipientclass": dedication_data.get("recipientClass", ""),  # Note: typo in Baserow field name
+            "Message": dedication_data.get("message", ""),
+        }
+        
+        # Only include Song field if spotifyUrl is provided and not empty
+        spotify_url = dedication_data.get("spotifyUrl")
+        if spotify_url:
+            baserow_data["Song"] = spotify_url
+            
+            # Save song title and artist to new Baserow fields
+            song_title = dedication_data.get("songTitle")
+            if song_title:
+                baserow_data["Songtitle"] = song_title
+            
+            song_artist = dedication_data.get("songArtist")
+            if song_artist:
+                baserow_data["Artistname"] = song_artist
+        else:
+            # If no Spotify URL, set to empty string (or omit if Baserow allows)
+            baserow_data["Song"] = ""
+        
+        # Save timestamp to Baserow Timestamp field
+        timestamp = dedication_data.get("timestamp")
+        if timestamp:
+            baserow_data["Timestamp"] = timestamp
+        
+        response = requests.post(
+            f"{BASEROW_API_URL}/?user_field_names=true",
+            headers=HEADERS,
+            json=baserow_data
+        )
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        print(f"Error saving dedication to Baserow: {e}")
+        raise
 
 # Serve static files
 @app.route('/')
@@ -68,13 +143,11 @@ def create_dedication():
         if 'timestamp' not in data:
             data['timestamp'] = datetime.now().isoformat()
         
-        # Save to JSON file
-        dedications = load_dedications()
-        dedications.insert(0, data)
-        if save_dedications(dedications):
-            return jsonify(data), 201
+        # Save to Baserow
+        saved_data = save_dedication(data)
         
-        return jsonify({'error': 'Failed to save dedication'}), 500
+        # Return the saved data with our app format
+        return jsonify(data), 201
     except Exception as e:
         print(f"Error creating dedication: {e}")
         return jsonify({'error': 'Failed to create dedication'}), 500
@@ -88,8 +161,16 @@ def delete_dedication(index):
         if index < 0 or index >= len(dedications):
             return jsonify({'error': 'Dedication not found'}), 404
         
-        dedications.pop(index)
-        save_dedications(dedications)
+        # Get the Baserow row ID from the dedication at this index
+        row_id = dedications[index].get("id")
+        if not row_id:
+            return jsonify({'error': 'Dedication ID not found'}), 404
+        
+        # Delete from Baserow
+        delete_url = f"{BASEROW_API_URL}/{row_id}/"
+        response = requests.delete(delete_url, headers=HEADERS)
+        response.raise_for_status()
+        
         return jsonify({'success': True}), 200
     except Exception as e:
         print(f"Error deleting dedication: {e}")
@@ -100,7 +181,7 @@ def health_check():
     """Health check endpoint"""
     return jsonify({
         'status': 'ok',
-        'storage': 'json_file'
+        'storage': 'baserow'
     }), 200
 
 if __name__ == '__main__':

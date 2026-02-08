@@ -6,6 +6,7 @@ env: standard
 
 env_variables:
   FLASK_ENV: "production"
+  BASEROW_TOKEN: "lx3pu0Jovlbaujjilm270IeMxdPbZTr4"
 
 automatic_scaling:
   min_instances: 1
